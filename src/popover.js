@@ -1,25 +1,13 @@
 export default class Popover {
-  constructor(options = {}) {
-    this.title = options.title || 'Popover title';
-    this.text = options.text || 'And here\'s some amazing content. It\'s very engaging. Right?';
-    this.element = null;
+  constructor(triggerElement) {
+    this.element = triggerElement;
     this.popoverElement = null;
     this.isVisible = false;
-  }
-
-  init(triggerElement) {
-    this.element = triggerElement;
+    this.title = this.element.dataset.title || 'Popover title';
+    this.text = this.element.dataset.content || 'And here\'s some amazing content. It\'s very engaging. Right?';
     
-    // Create popover element if it doesn't exist
-    if (!this.popoverElement) {
-      this.createPopoverElement();
-    }
-
-    // Add event listener
-    this.element.addEventListener('click', this.toggle.bind(this));
-
-    // Close popover when clicking outside
-    document.addEventListener('click', this.handleOutsideClick.bind(this));
+    this.createPopoverElement();
+    this.bindEvents();
   }
 
   createPopoverElement() {
@@ -35,25 +23,32 @@ export default class Popover {
     body.className = 'popover-body';
     const textParagraph = document.createElement('p');
     textParagraph.textContent = this.text;
-    body.appendChild(textParagraph);
+    body.append(textParagraph);
     
-    popover.appendChild(header);
-    popover.appendChild(body);
+    popover.append(header, body);
     
-    // Append to the button wrapper
     const wrapper = this.element.closest('.button-wrapper');
     if (wrapper) {
-      wrapper.appendChild(popover);
+      wrapper.append(popover);
     } else {
-      // If no wrapper, append to parent
-      this.element.parentNode.appendChild(popover);
+      this.element.parentNode.append(popover);
     }
     
     this.popoverElement = popover;
   }
 
+  bindEvents() {
+    this.toggle = this.toggle.bind(this);
+    this.handleOutsideClick = this.handleOutsideClick.bind(this);
+    
+    this.element.addEventListener('click', this.toggle);
+    document.addEventListener('click', this.handleOutsideClick);
+  }
+
   toggle(event) {
-    event.stopPropagation();
+    if (event) {
+      event.stopPropagation();
+    }
     this.isVisible = !this.isVisible;
     this.updateVisibility();
   }
@@ -69,10 +64,12 @@ export default class Popover {
   }
 
   updateVisibility() {
-    if (this.isVisible) {
-      this.popoverElement.classList.add('show');
-    } else {
-      this.popoverElement.classList.remove('show');
+    if (this.popoverElement) {
+      if (this.isVisible) {
+        this.popoverElement.classList.add('show');
+      } else {
+        this.popoverElement.classList.remove('show');
+      }
     }
   }
 
@@ -89,12 +86,14 @@ export default class Popover {
 
   destroy() {
     if (this.element) {
-      this.element.removeEventListener('click', this.toggle.bind(this));
+      this.element.removeEventListener('click', this.toggle);
     }
-    document.removeEventListener('click', this.handleOutsideClick.bind(this));
+    document.removeEventListener('click', this.handleOutsideClick);
+    
     if (this.popoverElement && this.popoverElement.parentNode) {
-      this.popoverElement.parentNode.removeChild(this.popoverElement);
+      this.popoverElement.remove();
     }
+    
     this.popoverElement = null;
     this.element = null;
     this.isVisible = false;

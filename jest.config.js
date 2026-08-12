@@ -12,13 +12,14 @@ module.exports = {
     '!src/index.js',
     '!**/*.test.js',
     '!**/node_modules/**',
+    '!**/__mocks__/**',
   ],
   coverageThreshold: {
     global: {
-      branches: 70,
-      functions: 70,
-      lines: 70,
-      statements: 70,
+      branches: 90,
+      functions: 95,
+      lines: 95,
+      statements: 95,
     },
   },
   testMatch: ['**/__tests__/**/*.test.js'],
